@@ -1,9 +1,18 @@
+from enum import Enum
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password
+
+class RoleEnum(Enum):
+    ADMIN = "admin"
+    SELLER = "seller"
+    DELIVERY = "delivery"
+    CUSTOMER = "customer"
+
 
 # Roles
 class Role(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, choices=[(tag.value, tag.name.title()) for tag in RoleEnum])
 
     def __str__(self):
         return self.name
@@ -14,12 +23,19 @@ class User(AbstractUser):
     user_name = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+    role = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True)
     address = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=20)
 
+    def save(self, *args, **kwargs):
+        # Hash the password only if it's not already hashed
+        if self._state.adding or 'pbkdf2_' not in self.password:
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.username
+
 
 
 # Category
