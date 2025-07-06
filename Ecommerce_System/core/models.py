@@ -20,7 +20,8 @@ class Role(models.Model):
 
 # Custom User
 class User(AbstractUser):
-    user_name = models.CharField(max_length=150, unique=True)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
     role = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True)
