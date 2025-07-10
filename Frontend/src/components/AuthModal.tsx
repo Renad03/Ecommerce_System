@@ -18,6 +18,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    username: '',
     email: '',
     phone: '',
     password: '',
@@ -36,17 +37,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const url = mode === 'signup' 
+    ? 'http://localhost:8000/user/register/' 
+    : 'http://localhost:8000/api/auth/login';
+
+  const payload = mode === 'signup'
+    ? {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        phone_number: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      }
+    : {
+        email: formData.email,
+        password: formData.password
+      };
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Handle validation or auth errors
+     console.error(data);
+alert(data.message || JSON.stringify(data) || 'Something went wrong');
+
+    } else {
+      // Successful login/signup
+      alert(`Success! Welcome ${data.user?.firstName || ''}`);
+      onClose(); // Close modal
+    }
+  } catch (err) {
+    console.error('API error:', err);
+    alert('Server error. Please try again.');
+  }
+};
+
 
   const switchMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login');
     setFormData({
       firstName: '',
       lastName: '',
+      username: '',
       email: '',
       phone: '',
       password: '',
@@ -123,6 +169,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
                   </div>
                 </div>
+                   <div>
+                    <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleInputChange}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors duration-200"
+                        placeholder="John_Doe"
+                        required
+                      />
+                    </div>
+                  </div>
+             
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">

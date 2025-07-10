@@ -24,7 +24,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=30, blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
-    role = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True)
+    role = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True, default=1)
     address = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=20)
 
