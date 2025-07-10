@@ -74,8 +74,12 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, onNa
             </button>
             <button 
               onClick={() => {
-                setAuthMode('login');
-                setIsAuthModalOpen(true);
+                if (onNavigate) {
+                  onNavigate('profile');
+                } else {
+                  setAuthMode('login');
+                  setIsAuthModalOpen(true);
+                }
               }}
               className="text-gray-700 hover:text-pink-500 transition-colors duration-200"
             >

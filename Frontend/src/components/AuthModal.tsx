@@ -42,7 +42,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const url = mode === 'signup' 
     ? 'http://localhost:8000/user/register/' 
-    : 'http://localhost:8000/api/auth/login';
+    : 'http://localhost:8000/user/login/';
 
   const payload = mode === 'signup'
     ? {
@@ -73,7 +73,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (!res.ok) {
       // Handle validation or auth errors
      console.error(data);
-alert(data.message || JSON.stringify(data) || 'Something went wrong');
+     alert(data.message || JSON.stringify(data) || 'Something went wrong');
 
     } else {
       // Successful login/signup

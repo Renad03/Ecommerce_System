@@ -6,6 +6,7 @@ import { Products } from './components/Products';
 import { CategoryPage } from './components/CategoryPage';
 import { About } from './components/About';
 import { ContactPage } from './components/ContactPage';
+import { UserProfile } from './components/UserProfile';
 import { Footer } from './components/Footer';
 import { Cart } from './components/Cart';
 import { useCart } from './hooks/useCart';
@@ -36,6 +37,8 @@ function App() {
         return <About />;
       case 'contact':
         return <ContactPage />;
+      case 'profile':
+        return <UserProfile />;
       default:
         return (
           <>

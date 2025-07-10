@@ -1,6 +1,6 @@
 from enum import Enum
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 
 class RoleEnum(Enum):
@@ -9,34 +9,52 @@ class RoleEnum(Enum):
     DELIVERY = "delivery"
     CUSTOMER = "customer"
 
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 
-# Roles
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("Email must be provided")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+
+        if not password:
+            raise ValueError("Superuser must have a password")
+
+        return self.create_user(email, password, **extra_fields)
+
+
 class Role(models.Model):
-    name = models.CharField(max_length=50, choices=[(tag.value, tag.name.title()) for tag in RoleEnum])
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
 
 
-# Custom User
 class User(AbstractUser):
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
+    username = None 
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=128)
-    role = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True, default=1)
-    address = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=20)
+    address = models.TextField(blank=True, null=True)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, default=1)
 
-    def save(self, *args, **kwargs):
-        # Hash the password only if it's not already hashed
-        if self._state.adding or 'pbkdf2_' not in self.password:
-            self.password = make_password(self.password)
-        super().save(*args, **kwargs)
+    USERNAME_FIELD = 'email' 
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number']
+
+    objects = CustomUserManager()
 
     def __str__(self):
-        return self.username
-
+        return self.email
 
 
 # Category

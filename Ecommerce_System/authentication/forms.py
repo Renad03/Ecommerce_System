@@ -5,7 +5,7 @@ from core.models import User
 class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username','first_name', 'last_name', 'email', 'password1', 'password2', 'role', 'address', 'phone_number')
+        fields = ('first_name', 'last_name', 'email', 'password1', 'password2', 'role', 'address', 'phone_number')
         widgets = {
             'password1': forms.PasswordInput(),
             'password2': forms.PasswordInput(),
