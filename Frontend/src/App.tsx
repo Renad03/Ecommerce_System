@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Categories } from './components/Categories';
@@ -11,9 +11,13 @@ import { Footer } from './components/Footer';
 import { Cart } from './components/Cart';
 import { useCart } from './hooks/useCart';
 import { products } from './data/products';
+import { AuthModal } from './components/AuthModal';
 
 function App() {
-  const [currentPage, setCurrentPage] = React.useState('home');
+  const [currentPage, setCurrentPage] = useState('home');
+  const [user, setUser] = useState(null);
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+
   const {
     cartItems,
     isCartOpen,
@@ -38,7 +42,7 @@ function App() {
       case 'contact':
         return <ContactPage />;
       case 'profile':
-        return <UserProfile />;
+        return <UserProfile user={user} setUser={setUser} />; // use user here
       default:
         return (
           <>
@@ -50,25 +54,48 @@ function App() {
         );
     }
   };
+
+  console.log("Current user in App:", user);
   return (
-    <div className="min-h-screen bg-white">
-      <Header
-        onCartClick={() => setIsCartOpen(true)}
-        cartItemCount={getTotalItems()}
-        onNavigate={setCurrentPage}
+  <div className="min-h-screen bg-white">
+    <Header
+      onCartClick={() => setIsCartOpen(true)}
+      cartItemCount={getTotalItems()}
+      onNavigate={setCurrentPage}
+      user={user}
+      onLoginClick={() => setAuthModalOpen(true)}
+    />
+
+    {/* 🔒 Show login modal if not authenticated */}
+    {!user && (
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="login"
+        setUser={setUser}
       />
-      {renderPage()}
-      <Footer />
-      <Cart
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onUpdateQuantity={updateQuantity}
-        onRemoveItem={removeFromCart}
-        totalPrice={getTotalPrice()}
-      />
-    </div>
-  );
+    )}
+
+    {currentPage === 'profile' ? (
+      user ? <UserProfile user={user} setUser={setUser} />
+           : null
+    ) 
+    : (
+      renderPage()
+    )}
+
+    <Footer />
+    <Cart
+      isOpen={isCartOpen}
+      onClose={() => setIsCartOpen(false)}
+      cartItems={cartItems}
+      onUpdateQuantity={updateQuantity}
+      onRemoveItem={removeFromCart}
+      totalPrice={getTotalPrice()}
+    />
+  </div>
+);
+
 }
 
 export default App;

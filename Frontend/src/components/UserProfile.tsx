@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   User,
   Settings,
@@ -22,23 +22,41 @@ import {
 } from 'lucide-react';
 import { AuthModal } from './AuthModal';
 
-export const UserProfile: React.FC = () => {
+interface UserProfileProps {
+  user: any;
+  setUser: (user: any) => void;
+}
+export const UserProfile: React.FC<UserProfileProps> = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [profileData, setProfileData] = useState({
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    email: 'sarah.johnson@email.com',
-    phone: '+1 (555) 123-4567',
-    dateOfBirth: '1990-05-15',
-    skinType: 'combination',
-    beautyPreferences: ['cruelty-free', 'organic', 'vegan'],
-    avatar: 'https://images.pexels.com/photos/3685530/pexels-photo-3685530.jpeg?auto=compress&cs=tinysrgb&w=200'
-  });
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => 
+  {
   return !!localStorage.getItem('token'); // or sessionStorage
+  });
+
+  const [profileData, setProfileData] = useState({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone_number: '',
+  avatar: '',
+  password: ''
 });
+
+useEffect(() => {
+  if (user) {
+    setProfileData({
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      email: user.email || '',
+      phone_number: user.phone_number || '',
+      avatar: user.avatar || 'https://images.pexels.com/photos/3685530/pexels-photo-3685530.jpeg?auto=compress&cs=tinysrgb&w=200',
+      password: user.password || ''
+    });
+  }
+}, [user]);
+
 
   const [addresses, setAddresses] = useState([
     {
@@ -62,7 +80,6 @@ export const UserProfile: React.FC = () => {
       isDefault: false
     }
   ]);
-
   const orders = [
     {
       id: 'ORD-2024-001',
@@ -146,18 +163,6 @@ export const UserProfile: React.FC = () => {
   window.location.href = '/login';
 };
 
-const handleLogin = () => {
-  window.location.href = '/login';
-};
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered': return 'bg-green-100 text-green-800';
@@ -186,7 +191,7 @@ const handleLogin = () => {
           </div>
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {profileData.firstName} {profileData.lastName}
+              {profileData.first_name} {profileData.last_name}
             </h2>
             <p className="text-gray-600 mb-4">{profileData.email}</p>
             <div className="flex items-center space-x-4">
@@ -518,10 +523,12 @@ const handleLogin = () => {
 
        {isAuthModalOpen && (
   <AuthModal
-    isOpen={isAuthModalOpen}
-    onClose={() => setIsAuthModalOpen(false)}
-    initialMode="login"
-  />
+  isOpen={isAuthModalOpen}
+  onClose={() => setIsAuthModalOpen(false)}
+  initialMode="login"
+  setUser={setUser}
+/>
+
 )}
     </div>
   );

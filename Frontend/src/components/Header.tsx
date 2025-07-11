@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { Search, ShoppingBag, Menu, X, Heart, User } from 'lucide-react';
-import { AuthModal } from './AuthModal';
 
 interface HeaderProps {
   onCartClick: () => void;
   cartItemCount: number;
   onNavigate?: (page: string) => void;
+  user?: any;
+  onLoginClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, onNavigate }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onCartClick,
+  cartItemCount,
+  onNavigate,
+  user,
+  onLoginClick
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   const navItems = [
     { name: 'Home', href: 'home' },
@@ -29,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, onNa
     }
     setIsMenuOpen(false);
   };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,19 +78,22 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, onNa
             <button className="text-gray-700 hover:text-pink-500 transition-colors duration-200">
               <Heart className="h-6 w-6" />
             </button>
-            <button 
+
+            <button
               onClick={() => {
-                if (onNavigate) {
-                  onNavigate('profile');
+                if (user) {
+                  console.log('Navigating to profile: ', user.first_name);
+                  onNavigate?.('profile');
                 } else {
-                  setAuthMode('login');
-                  setIsAuthModalOpen(true);
+                  onLoginClick?.(); // trigger modal from App
                 }
               }}
               className="text-gray-700 hover:text-pink-500 transition-colors duration-200"
             >
               <User className="h-6 w-6" />
             </button>
+            
+
             <button
               onClick={onCartClick}
               className="text-gray-700 hover:text-pink-500 transition-colors duration-200 relative"
@@ -136,12 +145,6 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, onNa
           </div>
         )}
       </div>
-      
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialMode={authMode}
-      />
     </header>
   );
 };

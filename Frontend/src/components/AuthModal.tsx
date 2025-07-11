@@ -5,22 +5,25 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
+  setUser: (user: any) => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ 
   isOpen, 
   onClose, 
-  initialMode = 'login' 
+  initialMode = 'login',
+  setUser
 }) => {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     username: '',
     email: '',
-    phone: '',
+    phone_number: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false,
@@ -36,23 +39,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       [name]: type === 'checkbox' ? checked : value
     }));
   };
-
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
+  if (loading) return;
+
+  if (mode === 'signup' && formData.password !== formData.confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+
+  setLoading(true);
+
   const url = mode === 'signup' 
-    ? 'http://localhost:8000/user/register/' 
-    : 'http://localhost:8000/user/login/';
+  ? 'http://localhost:8000/user/register/' 
+  : `http://localhost:8000/user/login/`;
+
 
   const payload = mode === 'signup'
     ? {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         username: formData.username,
         email: formData.email,
-        phone_number: formData.phone,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword
+        phone_number: formData.phone_number,
+        password: formData.password
       }
     : {
         email: formData.email,
@@ -61,40 +72,48 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+});
 
-    const data = await res.json();
+const data = await res.json();
 
-    if (!res.ok) {
-      // Handle validation or auth errors
-     console.error(data);
-     alert(data.message || JSON.stringify(data) || 'Something went wrong');
+if (!res.ok) {
+  console.error(data);
+  alert(data.message || JSON.stringify(data) || 'Something went wrong');
+} else {
+  const user = data.user;
+  const token = data.token;
 
-    } else {
-      // Successful login/signup
-      alert(`Success! Welcome ${data.user?.firstName || ''}`);
-      onClose(); // Close modal
-    }
+  localStorage.setItem('token', token);  // ✅ store token
+  localStorage.setItem('user', JSON.stringify(user)); // ✅ store user
+  setUser(user);  // ✅ update state
+
+  alert(`Welcome ${user.first_name || user.last_name}`);
+  onClose();
+}
   } catch (err) {
     console.error('API error:', err);
     alert('Server error. Please try again.');
+  } finally {
+    setLoading(false);
   }
 };
+
+
 
 
   const switchMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login');
     setFormData({
-      firstName: '',
-      lastName: '',
+      first_name: '',
+      last_name: '',
       username: '',
       email: '',
-      phone: '',
+      phone_number: '',
       password: '',
       confirmPassword: '',
       agreeToTerms: false,
@@ -133,16 +152,16 @@ const handleSubmit = async (e: React.FormEvent) => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-2">
                       First Name
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                       <input
                         type="text"
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
+                        id="first_name"
+                        name="first_name"
+                        value={formData.first_name}
                         onChange={handleInputChange}
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors duration-200"
                         placeholder="John"
@@ -151,16 +170,16 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-2">
                       Last Name
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                       <input
                         type="text"
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
+                        id="last_name"
+                        name="last_name"
+                        value={formData.last_name}
                         onChange={handleInputChange}
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors duration-200"
                         placeholder="Doe"
@@ -198,8 +217,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <input
                       type="tel"
                       id="phone"
-                      name="phone"
-                      value={formData.phone}
+                      name="phone_number"
+                      value={formData.phone_number}
                       onChange={handleInputChange}
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors duration-200"
                       placeholder="+1 (555) 123-4567"
