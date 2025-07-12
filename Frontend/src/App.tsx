@@ -12,6 +12,7 @@ import { Cart } from './components/Cart';
 import { useCart } from './hooks/useCart';
 import { products } from './data/products';
 import { AuthModal } from './components/AuthModal';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -46,7 +47,7 @@ function App() {
       default:
         return (
           <>
-            <Hero />
+            <Hero setUser={setUser}/>
             <Categories />
             <Products onAddToCart={addToCart} />
             <About />
@@ -57,7 +58,8 @@ function App() {
 
   console.log("Current user in App:", user);
   return (
-  <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
+    <Toaster position="top-center" />
     <Header
       onCartClick={() => setIsCartOpen(true)}
       cartItemCount={getTotalItems()}

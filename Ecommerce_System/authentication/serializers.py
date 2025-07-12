@@ -11,13 +11,30 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'password', 'address']
 
 class RegisterSerializer(serializers.ModelSerializer):
+    confirm_password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'phone_number', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['first_name', 'last_name', 'username', 'email', 'phone_number', 'password', 'confirm_password']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value
+
+    def validate(self, data):
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match")
+        return data
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        validated_data.pop('confirm_password')  # Remove it before creating user
+        user = User.objects.create_user(**validated_data)
+        return user
+
     
     
 class LoginSerializer(serializers.Serializer):

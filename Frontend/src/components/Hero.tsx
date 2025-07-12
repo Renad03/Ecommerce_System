@@ -2,7 +2,9 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { AuthModal } from './AuthModal';
 
-export const Hero: React.FC = () => {
+// Accept as prop
+export const Hero: React.FC<{ setUser: (user: any) => void }> = ({ setUser }) => {
+
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
   const [authMode, setAuthMode] = React.useState<'login' | 'signup'>('signup');
 
@@ -99,7 +101,9 @@ export const Hero: React.FC = () => {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         initialMode={authMode}
+        setUser={setUser}
       />
+
     </>
   );
 };
