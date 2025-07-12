@@ -68,8 +68,8 @@ console.log('Is valid:', emailRegex.test(formData.email));
   setLoading(true); 
 
   const url = mode === 'signup' 
-  ? 'http://localhost:8000/user/register/' 
-  : `http://localhost:8000/user/login/`;
+  ? 'http://localhost:8000/api/user/register/' 
+  : `http://localhost:8000/api/user/login/`;
 
 
   const payload = mode === 'signup'
@@ -79,7 +79,8 @@ console.log('Is valid:', emailRegex.test(formData.email));
         username: formData.username,
         email: formData.email,
         phone_number: formData.phone_number,
-        password: formData.password
+        password: formData.password,
+        confirm_password: formData.confirmPassword,
       }
     : {
         email: formData.email,

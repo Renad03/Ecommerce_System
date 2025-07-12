@@ -32,7 +32,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, setUser }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => 
   {
-  return !!localStorage.getItem('token'); // or sessionStorage
+  return !!localStorage.getItem('token'); 
   });
 
   const [profileData, setProfileData] = useState({
